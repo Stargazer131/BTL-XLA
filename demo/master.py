@@ -15,7 +15,7 @@ class GenericFrame:
 
         # top part
         self.top_panel = ttk.Frame(self.root, borderwidth=2, relief="solid")
-        self.return_button = ttk.Button(self.top_panel, text="Return", command=self.go_back)
+        self.return_button = ttk.Button(self.top_panel, text="Return", command=self.go_back, cursor='hand2')
 
         # bottom part
         self.bottom_panel = ttk.Frame(self.root, borderwidth=2, relief="solid")
@@ -40,7 +40,7 @@ class GenericFrame:
         self.root.grid_rowconfigure(0, weight=1)
         self.root.grid_rowconfigure(1, weight=9)
         self.root.grid_columnconfigure(0, weight=1)
-        self.root.title(f'{self.algorithm.capitalize()} Algorithm')
+        self.root.title(f'{self.algorithm} algorithm')
 
     def init_top_panel(self):
         self.top_panel.grid(row=0, column=0, sticky="nsew")
@@ -53,7 +53,7 @@ class GenericFrame:
         # Left Panel (Image Chooser)
         self.left_panel.grid(row=0, column=0, padx=10, pady=10, sticky="nsew")
         self.input_image_label.pack()
-        open_button = ttk.Button(self.left_panel, text="Input Image", command=self.open_image)
+        open_button = ttk.Button(self.left_panel, text="Input Image", command=self.open_image, cursor='hand2')
         open_button.pack()
         self.left_panel.grid_columnconfigure(0, weight=1)
 
@@ -61,7 +61,7 @@ class GenericFrame:
         self.right_panel.grid(row=0, column=1, padx=10, pady=10, sticky="nsew")
         self.output_image_label.pack()
 
-        process_button = ttk.Button(self.right_panel, text="Output Image", command=self.process_image)
+        process_button = ttk.Button(self.right_panel, text="Output Image", command=self.process_image, cursor='hand2')
         process_button.pack()
         self.right_panel.grid_columnconfigure(0, weight=1)
 
@@ -111,6 +111,7 @@ class GenericFrame:
 
 class App:
     def __init__(self):
+
         self.algorithm_classes = get_classes_from_file('algorithms.py')
 
         # Create the main window
@@ -118,8 +119,8 @@ class App:
         self.root.title("Algorithm Selector")
 
         # Create a frame to hold the elements and center it
-        self.frame = tk.Frame(self.root)
-        self.frame.pack(expand=True)
+        self.frame = tk.Frame(self.root, borderwidth=1, relief='solid')
+        self.frame.pack(fill='both', expand=True)  # Configure fill and expand options
 
         # Create a label
         self.label = tk.Label(self.frame, text="Select an algorithm")
@@ -127,13 +128,19 @@ class App:
 
         # Create a combobox
         algorithm_options = [name for name in dir(ic) if callable(getattr(ic, name))]
-        self.combobox = ttk.Combobox(self.frame, values=algorithm_options, state='readonly')
+        self.combobox = ttk.Combobox(self.frame, values=algorithm_options, state='readonly', cursor='hand2')
         self.combobox.grid(row=0, column=1, padx=10, pady=10)
         self.combobox.set(algorithm_options[0])
 
         # Create a button
-        self.button = tk.Button(self.frame, text="Select", command=self.on_button_click, width=20, height=2)
+        self.button = tk.Button(self.frame, text="Select", command=self.on_button_click,
+                                width=30, height=3, cursor='hand2')
         self.button.grid(row=1, column=0, columnspan=2, padx=10, pady=10)
+
+        self.frame.grid_rowconfigure(0, weight=1)
+        self.frame.grid_rowconfigure(1, weight=1)
+        self.frame.grid_columnconfigure(0, weight=1)
+        self.frame.grid_columnconfigure(1, weight=1)
 
         # Center the window on the screen
         window_width = 500
