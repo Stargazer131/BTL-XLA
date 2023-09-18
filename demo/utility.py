@@ -44,4 +44,8 @@ def create_custom_weighted_kernel(k):
     return matrix
 
 
+def normalize_array(array):
+    return np.clip(array, 0, 255).astype(np.uint8)
+
+
 
