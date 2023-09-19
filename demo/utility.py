@@ -1,6 +1,5 @@
 import re
 import inspect
-
 import numpy as np
 
 
@@ -42,10 +41,3 @@ def create_custom_weighted_kernel(k):
     matrix /= np.sum(matrix)
 
     return matrix
-
-
-def normalize_array(array):
-    return np.clip(array, 0, 255).astype(np.uint8)
-
-
-

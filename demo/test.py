@@ -1,4 +1,5 @@
 import numpy as np
+from scipy import ndimage
 
 
 def test_k_nearest_mean_filter():
@@ -49,4 +50,34 @@ def test_symmetric_matrix():
     matrix[limit:, limit:] = np.flipud(flip_right_matrix)
 
     print(matrix)
+
+
+def test_min_max_filter():
+    data = np.array(
+        [[1, 2, 3, 2],
+         [4, 16, 2, 1],
+         [4, 2, 1, 1],
+         [2, 1, 2, 1]]
+    )
+
+    # max filter algorithm
+    pixel_values = ndimage.minimum_filter(data, size=(3, 3), mode='constant', cval=0)
+    print(pixel_values)
+
+
+def test_box_filter():
+    data = np.array(
+        [[1, 2, 3, 2],
+         [4, 16, 2, 1],
+         [4, 2, 1, 1],
+         [2, 1, 2, 1]], dtype=np.float64
+    )
+
+    k = 3
+    kernel = np.full((k, k), 1 / (k * k))
+    pixel_values = ndimage.convolve(data, kernel, mode='constant', cval=0)
+    pixel_values = np.round(pixel_values)
+
+    print(data.dtype)
+    print(pixel_values)
 
