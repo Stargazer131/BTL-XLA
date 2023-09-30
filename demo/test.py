@@ -2,38 +2,6 @@ import numpy as np
 from scipy import ndimage
 
 
-def test_k_nearest_mean_filter():
-    parameter = [3, 3, 2]
-    n = 4
-
-    data = np.array(
-        [[1, 2, 3, 2],
-         [4, 16, 2, 1],
-         [4, 2, 1, 1],
-         [2, 1, 2, 1]]
-    )
-
-    pixel_values = np.array(data).reshape(data.shape[0], data.shape[1])  # Get the grayscale pixel values
-    k, kernel_size, thresh_hold = parameter[0], parameter[1], parameter[2]
-    for i in range(data.shape[0]):
-        for j in range(data.shape[1]):
-            neighbour = []
-            center_value = pixel_values[i, j]
-            for x in range(i - kernel_size // 2, i + kernel_size // 2 + 1):
-                for y in range(j - kernel_size // 2, j + kernel_size // 2 + 1):
-                    if 0 <= x < data.shape[0] and 0 <= y < data.shape[1]:
-                        neighbour.append(pixel_values[x, y])
-                    else:
-                        neighbour.append(0)
-            neighbour.sort(key=lambda val: abs(val - center_value))
-            neighbour = np.array(neighbour)[:k]
-            k_nearest_mean = int(np.mean(neighbour))
-            if abs(center_value - k_nearest_mean) > thresh_hold:
-                pixel_values[i, j] = k_nearest_mean
-
-    print(pixel_values)
-
-
 def test_symmetric_matrix():
     k = 7
     limit = (k - 1) // 2
@@ -54,14 +22,27 @@ def test_symmetric_matrix():
 
 def test_min_max_filter():
     data = np.array(
-        [[1, 2, 3, 2],
-         [4, 16, 2, 1],
-         [4, 2, 1, 1],
-         [2, 1, 2, 1]]
+        [[1, 2, 3, 4],
+         [5, 6, 7, 8],
+         [9, 9, 8, 7],
+         [6, 5, 4, 3]]
     )
 
-    # max filter algorithm
-    pixel_values = ndimage.minimum_filter(data, size=(3, 3), mode='constant', cval=0)
+    pixel_values = data.copy()
+    k = 3
+
+    # min filter algorithm
+    for i in range(4):
+        for j in range(4):
+            x_limit = [i - k // 2, i + k // 2]
+            y_limit = [j - k // 2, j + k // 2]
+            if x_limit[0] < 0 or y_limit[0] < 0 or x_limit[1] >= 4 or y_limit[1] >= 4:
+                print(i, j, 0)
+                pixel_values[i, j] = 0
+            else:
+                print(i, j, pixel_values[x_limit[0]: x_limit[1]+1, y_limit[0]: y_limit[1]+1])
+                pixel_values[i, j] = np.min(data[x_limit[0]: x_limit[1]+1, y_limit[0]: y_limit[1]+1])
+
     print(pixel_values)
 
 
@@ -81,3 +62,60 @@ def test_box_filter():
     print(data.dtype)
     print(pixel_values)
 
+
+def test_k_nearest_mean_filter():
+    parameter = [3, 3, 2]
+
+    pixel_values = np.array([
+        [5, 4, 1, 1, 2, 3, 2, 3],
+        [3, 2, 3, 2, 5, 2, 6, 2],
+        [2, 5, 8, 2, 3, 2, 5, 6],
+        [2, 5, 2, 4, 2, 9, 1, 4],
+        [2, 2, 3, 2, 0, 7, 2, 1],
+        [1, 5, 7, 8, 2, 4, 5, 6]
+    ])
+
+    k, kernel_size, thresh_hold = parameter[0], parameter[1], parameter[2]
+    for i in range(pixel_values.shape[0]):
+        for j in range(pixel_values.shape[1]):
+            neighbour = []
+            center_value = pixel_values[i, j]
+            for x in range(i - kernel_size // 2, i + kernel_size // 2 + 1):
+                for y in range(j - kernel_size // 2, j + kernel_size // 2 + 1):
+                    if 0 <= x < pixel_values.shape[0] and 0 <= y < pixel_values.shape[1]:
+                        neighbour.append(pixel_values[x, y])
+                    else:
+                        neighbour.append(0)
+            neighbour.sort(key=lambda val: abs(val - center_value))
+            neighbour = np.array(neighbour)[:k]
+            print(f'{pixel_values[i, j]} ({i},{j})')
+            print(neighbour)
+            k_nearest_mean = np.round(np.mean(neighbour))
+            print(f'{center_value} - {k_nearest_mean} = {abs(center_value - k_nearest_mean)}')
+            if abs(center_value - k_nearest_mean) > thresh_hold:
+                pixel_values[i, j] = k_nearest_mean
+
+    print(pixel_values)
+
+
+def test_bincount():
+    pixel_values = np.array([
+        [0, 1, 2, 3, 4, 5],
+        [0, 0, 1, 2, 3, 4],
+        [0, 0, 0, 1, 2, 3],
+        [0, 0, 0, 0, 1, 2],
+        [0, 0, 0, 0, 0, 1]
+    ])
+
+    pixel_values = pixel_values.flatten()
+    grayscale_frequency = np.bincount(pixel_values) / len(pixel_values)
+    pi_cumsum = np.cumsum(grayscale_frequency)
+    mk_cumsum = np.cumsum(grayscale_frequency * np.array(range(len(grayscale_frequency))))
+    mg = mk_cumsum[-1]  # total cumulative sum
+    a = (mg * pi_cumsum - mk_cumsum) ** 2
+    b = pi_cumsum * (1 - pi_cumsum)
+    variance = a / b
+    otsu_threshold = np.argmax(variance)
+    print(otsu_threshold)
+
+test_bincount()
