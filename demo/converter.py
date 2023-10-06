@@ -24,11 +24,10 @@ def threshold(image: Image.Image, parameter):
     a = (mg * pi_cumsum - mk_cumsum) ** 2
     b = pi_cumsum * (1 - pi_cumsum)
     variance = a / (b + np.finfo(np.float64).eps)  # add epsilon to prevent divide by 0
-    otsu_threshold = np.argmax(variance)
+    otsu_threshold = np.mean(np.argwhere(variance == np.max(variance)))
     pixel_values = np.where(pixel_values > otsu_threshold, 255, 0)
 
-    pixel_values = pixel_values.astype(np.uint8)
-    image.putdata(pixel_values)
+    image.putdata(pixel_values.astype(np.uint8))
 
 
 def power_law(image: Image.Image, parameter):
