@@ -67,12 +67,12 @@ def test_k_nearest_mean_filter():
     parameter = [3, 3, 2]
 
     pixel_values = np.array([
-        [5, 4, 1, 1, 2, 3, 2, 3],
-        [3, 2, 3, 2, 5, 2, 6, 2],
-        [2, 5, 8, 2, 3, 2, 5, 6],
-        [2, 5, 2, 4, 2, 9, 1, 4],
-        [2, 2, 3, 2, 0, 7, 2, 1],
-        [1, 5, 7, 8, 2, 4, 5, 6]
+        [3, 1, 0, 7, 8, 3],
+        [9, 4, 0, 5, 9, 2],
+        [6, 4, 2, 7, 1, 2],
+        [5, 6, 9, 6, 4, 3],
+        [0, 4, 8, 6, 5, 3],
+        [6, 0, 0, 7, 1, 8]
     ])
 
     k, kernel_size, thresh_hold = parameter[0], parameter[1], parameter[2]
@@ -97,25 +97,18 @@ def test_k_nearest_mean_filter():
 
     print(pixel_values)
 
-
 def test_bincount():
     pixel_values = np.array([
-        [0, 1, 2, 3, 4, 5],
-        [0, 0, 1, 2, 3, 4],
-        [0, 0, 0, 1, 2, 3],
-        [0, 0, 0, 0, 1, 2],
-        [0, 0, 0, 0, 0, 1]
+        [7, 1, 3, 8, 8, 8],
+        [2, 0, 6, 5, 7, 0],
+        [6, 6, 4, 2, 7, 6],
+        [3, 8, 7, 1, 0, 1],
+        [2, 4, 9, 6, 2, 8],
+        [1, 4, 8, 7, 5, 3]
     ])
 
-    pixel_values = pixel_values.flatten()
-    grayscale_frequency = np.bincount(pixel_values) / len(pixel_values)
-    pi_cumsum = np.cumsum(grayscale_frequency)
-    mk_cumsum = np.cumsum(grayscale_frequency * np.array(range(len(grayscale_frequency))))
-    mg = mk_cumsum[-1]  # total cumulative sum
-    a = (mg * pi_cumsum - mk_cumsum) ** 2
-    b = pi_cumsum * (1 - pi_cumsum)
-    variance = a / b
-    otsu_threshold = np.argmax(variance)
-    print(otsu_threshold)
+    grayscale_frequency = np.bincount(pixel_values.flatten())
+    p_sum = 9 * np.cumsum(grayscale_frequency/36)
+    print(p_sum)
 
 test_bincount()

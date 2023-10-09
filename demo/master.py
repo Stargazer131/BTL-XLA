@@ -3,7 +3,7 @@ from tkinter import ttk
 from tkinter import filedialog
 from PIL import Image, ImageTk
 from demo import converter as ic
-from demo.utility import split_camel_case, get_classes_from_file
+from demo.utility import split_camel_case, get_classes_from_file, get_available_algorithms
 
 
 class GenericFrame:
@@ -89,7 +89,7 @@ class GenericFrame:
 
         # get selected algorithm name
         selected_function = getattr(ic, self.algorithm)  # store the function
-        selected_function(processed_image, self.parameters)
+        processed_image = selected_function(processed_image, self.parameters)
 
         # Resize the image to fit within the maximum dimensions while maintaining its aspect ratio
         processed_image.thumbnail((self.max_image_width, self.max_image_height))
@@ -127,7 +127,7 @@ class App:
         self.label.grid(row=0, column=0, padx=10, pady=10)
 
         # Create a combobox
-        algorithm_options = [name for name in dir(ic) if callable(getattr(ic, name))]
+        algorithm_options = get_available_algorithms()
         self.combobox = ttk.Combobox(self.frame, values=algorithm_options, state='readonly', cursor='hand2')
         self.combobox.grid(row=0, column=1, padx=10, pady=10)
         self.combobox.set(algorithm_options[0])

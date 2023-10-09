@@ -1,9 +1,10 @@
 import re
 import inspect
 import numpy as np
+from demo import converter as ic
 
 
-def get_classes_from_file(file_path):
+def get_classes_from_file(file_path: str):
     classes = []
 
     with open(file_path, 'r') as file:
@@ -19,13 +20,13 @@ def get_classes_from_file(file_path):
     return classes
 
 
-def split_camel_case(input_string):
+def split_camel_case(input_string: str):
     # Use regular expression to split CamelCase string
     parts = re.findall(r'[A-Z][a-z]*', input_string)
     return '_'.join(parts).lower()
 
 
-def create_custom_weighted_kernel(k):
+def create_custom_weighted_kernel(k: int):
     limit = (k - 1) // 2
     matrix = np.zeros((k, k))
     for x in range(limit + 1):
@@ -41,3 +42,9 @@ def create_custom_weighted_kernel(k):
     matrix /= np.sum(matrix)
 
     return matrix
+
+
+def get_available_algorithms():
+    algorithms = [name for name in dir(ic) if callable(getattr(ic, name))]
+    algorithms.remove('otsu_threshold')
+    return algorithms

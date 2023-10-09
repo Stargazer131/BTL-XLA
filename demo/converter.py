@@ -4,19 +4,29 @@ from scipy import ndimage, signal
 from demo import utility
 
 
-def negative(image: Image.Image, parameter):
+def negative(image: Image.Image, parameter: list):
     pixel_values = np.array(image.getdata(), dtype=np.uint8)
 
     # negative algorithm
     pixel_values = np.max(pixel_values) - pixel_values
 
-    image.putdata(pixel_values)
+    processed_image = image.copy()
+    processed_image.putdata(pixel_values)
+    return processed_image
 
 
-def threshold(image: Image.Image, parameter):
+def threshold(image: Image.Image, parameter: list):
     pixel_values = np.array(image.getdata())
 
     # threshold algorithm with otsu threshold
+    pixel_values = otsu_threshold(pixel_values).astype(np.uint8)
+
+    processed_image = image.copy()
+    processed_image.putdata(pixel_values)
+    return processed_image
+
+
+def otsu_threshold(pixel_values: np.ndarray):
     grayscale_frequency = np.bincount(pixel_values) / len(pixel_values)
     pi_cumsum = np.cumsum(grayscale_frequency)
     mk_cumsum = np.cumsum(grayscale_frequency * np.array(range(len(grayscale_frequency))))
@@ -24,13 +34,11 @@ def threshold(image: Image.Image, parameter):
     a = (mg * pi_cumsum - mk_cumsum) ** 2
     b = pi_cumsum * (1 - pi_cumsum)
     variance = a / (b + np.finfo(np.float64).eps)  # add epsilon to prevent divide by 0
-    otsu_threshold = np.mean(np.argwhere(variance == np.max(variance)))
-    pixel_values = np.where(pixel_values > otsu_threshold, 255, 0)
-
-    image.putdata(pixel_values.astype(np.uint8))
+    otsu_threshold_ = np.mean(np.argwhere(variance == np.max(variance)))
+    return np.where(pixel_values > otsu_threshold_, 255, 0)
 
 
-def power_law(image: Image.Image, parameter):
+def power_law(image: Image.Image, parameter: list):
     pixel_values = np.array(image.getdata())
     c, y = parameter[0], parameter[1]
 
@@ -38,10 +46,12 @@ def power_law(image: Image.Image, parameter):
     pixel_values = c * (pixel_values ** y)
 
     pixel_values = np.clip(pixel_values, 0, 255).astype(np.uint8)
-    image.putdata(pixel_values)
+    processed_image = image.copy()
+    processed_image.putdata(pixel_values)
+    return processed_image
 
 
-def max_filter(image: Image.Image, parameter):
+def max_filter(image: Image.Image, parameter: list):
     pixel_values = np.array(image.getdata(), dtype=np.uint8)
     pixel_values = pixel_values.reshape(image.height, image.width)
     k = parameter[0]
@@ -49,10 +59,12 @@ def max_filter(image: Image.Image, parameter):
     # max filter algorithm
     pixel_values = ndimage.maximum_filter(pixel_values, size=(k, k), mode='constant', cval=0)
 
-    image.putdata(pixel_values.flatten())
+    processed_image = image.copy()
+    processed_image.putdata(pixel_values.flatten())
+    return processed_image
 
 
-def min_filter(image: Image.Image, parameter):
+def min_filter(image: Image.Image, parameter: list):
     pixel_values = np.array(image.getdata(), dtype=np.uint8)
     pixel_values = pixel_values.reshape(image.height, image.width)
     k = parameter[0]
@@ -60,10 +72,12 @@ def min_filter(image: Image.Image, parameter):
     # min filter algorithm
     pixel_values = ndimage.minimum_filter(pixel_values, size=(k, k), mode='constant', cval=0)
 
-    image.putdata(pixel_values.flatten())
+    processed_image = image.copy()
+    processed_image.putdata(pixel_values.flatten())
+    return processed_image
 
 
-def simple_average_filter(image: Image.Image, parameter):
+def simple_average_filter(image: Image.Image, parameter: list):
     pixel_values = np.array(image.getdata(), dtype=np.float64)
     pixel_values = pixel_values.reshape(image.height, image.width)
     k = parameter[0]
@@ -73,10 +87,12 @@ def simple_average_filter(image: Image.Image, parameter):
     pixel_values = ndimage.convolve(pixel_values, kernel, mode='constant', cval=0)
 
     pixel_values = np.round(pixel_values).astype(np.uint8)
-    image.putdata(pixel_values.flatten())
+    processed_image = image.copy()
+    processed_image.putdata(pixel_values.flatten())
+    return processed_image
 
 
-def weighted_average_filter(image: Image.Image, parameter):
+def weighted_average_filter(image: Image.Image, parameter: list):
     pixel_values = np.array(image.getdata(), dtype=np.float64)
     pixel_values = pixel_values.reshape(image.height, image.width)
     k = parameter[0]
@@ -86,10 +102,12 @@ def weighted_average_filter(image: Image.Image, parameter):
     pixel_values = ndimage.convolve(pixel_values, kernel, mode='constant', cval=0)
 
     pixel_values = np.round(pixel_values).astype(np.uint8)
-    image.putdata(pixel_values.flatten())
+    processed_image = image.copy()
+    processed_image.putdata(pixel_values.flatten())
+    return processed_image
 
 
-def k_nearest_mean_filter(image: Image.Image, parameter):
+def k_nearest_mean_filter(image: Image.Image, parameter: list):
     pixel_values = np.array(image.getdata())
     pixel_values = pixel_values.reshape(image.height, image.width)
     k, kernel_size, thresh_hold = parameter[0], parameter[1], parameter[2]
@@ -112,10 +130,13 @@ def k_nearest_mean_filter(image: Image.Image, parameter):
             if abs(center_value - k_nearest_mean) > thresh_hold:
                 pixel_values[i, j] = k_nearest_mean
 
-    image.putdata(pixel_values.flatten().astype(np.uint8))
+    pixel_values = pixel_values.flatten().astype(np.uint8)
+    processed_image = image.copy()
+    processed_image.putdata(pixel_values)
+    return processed_image
 
 
-def median_filter(image: Image.Image, parameter):
+def median_filter(image: Image.Image, parameter: list):
     pixel_values = np.array(image.getdata(), dtype=np.uint8)
     pixel_values = pixel_values.reshape(image.height, image.width)
     kernel_size = parameter[0]
@@ -123,4 +144,6 @@ def median_filter(image: Image.Image, parameter):
     # median filter algorithm
     pixel_values = signal.medfilt2d(pixel_values, kernel_size)
 
-    image.putdata(pixel_values.flatten())
+    processed_image = image.copy()
+    processed_image.putdata(pixel_values.flatten())
+    return processed_image
