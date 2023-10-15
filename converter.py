@@ -145,7 +145,7 @@ def median_filter(image: Image.Image, parameter: list):
 # start of edge detection (chap 4)
 
 def laplacian_filter(image: Image.Image, parameter: list):
-    pixel_values = np.array(image.getdata(), dtype=np.uint8)
+    pixel_values = np.array(image.getdata(), dtype=np.float64)
     pixel_values = pixel_values.reshape(image.height, image.width)
     kernel_type = parameter[0]
 
@@ -155,26 +155,27 @@ def laplacian_filter(image: Image.Image, parameter: list):
             [0, 1, 0],
             [1, -4, 1],
             [0, 1, 0]
-        ])
+        ], dtype=np.float64)
     elif kernel_type == 'variant_filter':
         kernel = np.array([
             [0, 1, 0],
             [1, -8, 1],
             [0, 1, 0]
-        ])
+        ], dtype=np.float64)
     elif kernel_type == 'enhancer':
         kernel = np.array([
             [0, -1, 0],
             [-1, 5, -1],
             [0, -1, 0]
-        ])
+        ], dtype=np.float64)
     else:
         kernel = np.array([
             [-1, -1, -1],
             [-1, 9, -1],
             [-1, -1, -1]
-        ])
+        ], dtype=np.float64)
     pixel_values = ndimage.convolve(pixel_values, kernel, mode='constant', cval=0)
+    pixel_values = np.clip(pixel_values, 0, 255).astype(np.uint8)
 
     processed_image = image.copy()
     processed_image.putdata(pixel_values.flatten())

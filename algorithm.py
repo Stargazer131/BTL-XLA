@@ -34,8 +34,8 @@ def otsu(pixel_values: np.ndarray):
 
 def mask1d(pixel_values: np.ndarray):
     x1d = np.array([[1],
-                    [-1]])
-    y1d = np.array([[1, -1]])
+                    [-1]], dtype=np.float64)
+    y1d = np.array([[1, -1]], dtype=np.float64)
     x_gradient = ndimage.convolve(pixel_values, x1d, mode='constant', cval=0)
     y_gradient = ndimage.convolve(pixel_values, y1d, mode='constant', cval=0)
     gradient = np.round(np.sqrt(x_gradient ** 2 + y_gradient ** 2))
@@ -44,9 +44,9 @@ def mask1d(pixel_values: np.ndarray):
 
 def robert(pixel_values: np.ndarray):
     x_robert = np.array([[-1, 0],
-                        [0, 1]])
+                        [0, 1]], dtype=np.float64)
     y_robert = np.array([[0, 1],
-                        [-1, 0]])
+                        [-1, 0]], dtype=np.float64)
     x_gradient = ndimage.convolve(pixel_values, x_robert, mode='constant', cval=0)
     y_gradient = ndimage.convolve(pixel_values, y_robert, mode='constant', cval=0)
     gradient = np.round(np.sqrt(x_gradient ** 2 + y_gradient ** 2))
@@ -56,10 +56,10 @@ def robert(pixel_values: np.ndarray):
 def prewitt(pixel_values: np.ndarray):
     x_prewitt = np.array([[1, 0, -1],
                          [1, 0, -1],
-                         [1, 0, -1]])
+                         [1, 0, -1]], dtype=np.float64)
     y_prewitt = np.array([[1, 1, 1],
                          [0, 0, 0],
-                         [-1, -1, -1]])
+                         [-1, -1, -1]], dtype=np.float64)
     x_gradient = ndimage.convolve(pixel_values, x_prewitt, mode='constant', cval=0)
     y_gradient = ndimage.convolve(pixel_values, y_prewitt, mode='constant', cval=0)
     gradient = np.round(np.sqrt(x_gradient ** 2 + y_gradient ** 2))
@@ -69,12 +69,26 @@ def prewitt(pixel_values: np.ndarray):
 def sobel(pixel_values: np.ndarray):
     x_sobel = np.array([[1, 0, -1],
                        [2, 0, -2],
-                       [1, 0, -1]])
+                       [1, 0, -1]], dtype=np.float64)
     y_sobel = np.array([[1, 2, 1],
                        [0, 0, 0],
-                       [-1, -2, -1]])
+                       [-1, -2, -1]], dtype=np.float64)
     x_gradient = ndimage.convolve(pixel_values, x_sobel, mode='constant', cval=0)
     y_gradient = ndimage.convolve(pixel_values, y_sobel, mode='constant', cval=0)
     gradient = np.round(np.sqrt(x_gradient ** 2 + y_gradient ** 2))
     return gradient
 
+
+def gaussian_filter(pixel_values: np.ndarray, kernel_size=3, sigma=1):
+    # Calculate the center of the kernel
+    center = (kernel_size - 1) / 2
+
+    # Create the Gaussian kernel
+    gaussian_kernel = np.fromfunction(
+        lambda x, y: (1 / (2 * np.pi * sigma**2)) * np.exp(-((x - center)**2 + (y - center)**2) / (2 * sigma**2)),
+        (kernel_size, kernel_size), dtype=np.float64
+    )
+    gaussian_kernel = gaussian_kernel / np.sum(gaussian_kernel.flatten())
+
+    result = ndimage.convolve(pixel_values, gaussian_kernel, mode='constant', cval=0)
+    return np.round(result).astype(np.uint8)

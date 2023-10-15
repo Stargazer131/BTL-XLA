@@ -1,5 +1,6 @@
 import numpy as np
 from scipy import ndimage
+import algorithm
 
 
 def test_symmetric_matrix():
@@ -111,4 +112,18 @@ def test_bincount():
     p_sum = 9 * np.cumsum(grayscale_frequency/36)
     print(p_sum)
 
-test_bincount()
+
+def test_gaussian():
+    pixel_values = np.array([
+        [7, 1, 3, 8, 8, 8],
+        [2, 0, 6, 5, 7, 0],
+        [6, 6, 4, 2, 7, 6],
+        [3, 8, 7, 1, 0, 1],
+        [2, 4, 9, 6, 2, 8],
+        [1, 4, 8, 7, 5, 3]
+    ], dtype=np.float64)
+
+    print(algorithm.gaussian_filter(pixel_values))
+
+
+test_gaussian()
