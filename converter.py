@@ -4,6 +4,8 @@ from scipy import ndimage, signal
 import algorithm
 
 
+# start of image enhancer (chap 3)
+
 def negative(image: Image.Image, parameter: list):
     pixel_values = np.array(image.getdata(), dtype=np.uint8)
 
@@ -19,7 +21,8 @@ def threshold(image: Image.Image, parameter: list):
     pixel_values = np.array(image.getdata())
 
     # threshold algorithm with otsu threshold
-    pixel_values = algorithm.otsu_threshold(pixel_values).astype(np.uint8)
+    otsu_threshold = algorithm.otsu(pixel_values)
+    pixel_values = np.where(pixel_values > otsu_threshold, 255, 0).astype(np.uint8)
 
     processed_image = image.copy()
     processed_image.putdata(pixel_values)
@@ -135,3 +138,45 @@ def median_filter(image: Image.Image, parameter: list):
     processed_image = image.copy()
     processed_image.putdata(pixel_values.flatten())
     return processed_image
+
+
+# end of image enhancer (chap 3)
+
+# start of edge detection (chap 4)
+
+def laplacian_filter(image: Image.Image, parameter: list):
+    pixel_values = np.array(image.getdata(), dtype=np.uint8)
+    pixel_values = pixel_values.reshape(image.height, image.width)
+    kernel_type = parameter[0]
+
+    # laplacian filter and enhancer
+    if kernel_type == 'filter':
+        kernel = np.array([
+            [0, 1, 0],
+            [1, -4, 1],
+            [0, 1, 0]
+        ])
+    elif kernel_type == 'variant_filter':
+        kernel = np.array([
+            [0, 1, 0],
+            [1, -8, 1],
+            [0, 1, 0]
+        ])
+    elif kernel_type == 'enhancer':
+        kernel = np.array([
+            [0, -1, 0],
+            [-1, 5, -1],
+            [0, -1, 0]
+        ])
+    else:
+        kernel = np.array([
+            [-1, -1, -1],
+            [-1, 9, -1],
+            [-1, -1, -1]
+        ])
+    pixel_values = ndimage.convolve(pixel_values, kernel, mode='constant', cval=0)
+
+    processed_image = image.copy()
+    processed_image.putdata(pixel_values.flatten())
+    return processed_image
+

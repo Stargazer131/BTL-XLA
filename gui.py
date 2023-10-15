@@ -163,7 +163,7 @@ class App:
                 running_frame.root.mainloop()
 
 
-# child class
+# start of image enhancer (chap 3)
 
 class Negative(GenericFrame):
     pass
@@ -298,3 +298,28 @@ class KNearestMeanFilter(GenericFrame):
 
 class MedianFilter(Filter):
     pass
+
+
+# end of image enhancer (chap 3)
+
+# start of edge detection (chap 4)
+
+class LaplacianFilter(GenericFrame):
+    def __init__(self, algorithm):
+        super().__init__(algorithm)
+
+        values = ['filter', 'variant_filter', 'enhancer', 'variant_enhancer']
+        self.type_combobox = ttk.Combobox(self.top_panel, values=values, state='readonly', cursor='hand2')
+        self.type_combobox.set(values[0])
+
+    def init_top_panel(self):
+        super().init_top_panel()
+
+        type_label = ttk.Label(self.top_panel, text="Kernel type: ")
+        type_label.grid(row=0, column=1, padx=5, pady=5)
+        self.type_combobox.grid(row=0, column=2, padx=5, pady=5)
+
+    def process_image(self):
+        self.parameters = self.type_combobox.get()
+
+        super().process_image()
