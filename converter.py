@@ -1,7 +1,7 @@
 from PIL import Image
 import numpy as np
 from scipy import ndimage, signal
-from demo import utility
+import algorithm
 
 
 def negative(image: Image.Image, parameter: list):
@@ -19,23 +19,11 @@ def threshold(image: Image.Image, parameter: list):
     pixel_values = np.array(image.getdata())
 
     # threshold algorithm with otsu threshold
-    pixel_values = otsu_threshold(pixel_values).astype(np.uint8)
+    pixel_values = algorithm.otsu_threshold(pixel_values).astype(np.uint8)
 
     processed_image = image.copy()
     processed_image.putdata(pixel_values)
     return processed_image
-
-
-def otsu_threshold(pixel_values: np.ndarray):
-    grayscale_frequency = np.bincount(pixel_values) / len(pixel_values)
-    pi_cumsum = np.cumsum(grayscale_frequency)
-    mk_cumsum = np.cumsum(grayscale_frequency * np.array(range(len(grayscale_frequency))))
-    mg = mk_cumsum[-1]  # total cumulative sum
-    a = (mg * pi_cumsum - mk_cumsum) ** 2
-    b = pi_cumsum * (1 - pi_cumsum)
-    variance = a / (b + np.finfo(np.float64).eps)  # add epsilon to prevent divide by 0
-    otsu_threshold_ = np.mean(np.argwhere(variance == np.max(variance)))
-    return np.where(pixel_values > otsu_threshold_, 255, 0)
 
 
 def power_law(image: Image.Image, parameter: list):
@@ -98,7 +86,7 @@ def weighted_average_filter(image: Image.Image, parameter: list):
     k = parameter[0]
 
     # weighted average filter algorithm
-    kernel = utility.create_custom_weighted_kernel(k)  # using the so-so same structure as gaussian kernel
+    kernel = algorithm.create_custom_weighted_kernel(k)  # using the so-so same structure as gaussian kernel
     pixel_values = ndimage.convolve(pixel_values, kernel, mode='constant', cval=0)
 
     pixel_values = np.round(pixel_values).astype(np.uint8)
