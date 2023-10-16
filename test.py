@@ -1,24 +1,11 @@
 import numpy as np
+import scipy.ndimage
 from scipy import ndimage
 import algorithm
 
 
 def test_symmetric_matrix():
-    k = 7
-    limit = (k - 1) // 2
-    matrix = np.zeros((k, k))
-    for x in range(limit + 1):
-        for y in range(limit + 1):
-            matrix[x, y] = x + y + 1
-
-    flip_right_matrix = np.fliplr(matrix[:limit + 1, :limit + 1])
-    flip_down_matrix = np.flipud(matrix[:limit + 1, :limit + 1])
-
-    matrix[:limit + 1, limit:] = flip_right_matrix
-    matrix[limit:, :limit + 1] = flip_down_matrix
-    matrix[limit:, limit:] = np.flipud(flip_right_matrix)
-
-    print(matrix)
+    print(algorithm.create_custom_weighted_kernel(5))
 
 
 def test_min_max_filter():
@@ -126,4 +113,67 @@ def test_gaussian():
     print(algorithm.gaussian_filter(pixel_values))
 
 
-test_gaussian()
+def test_theta():
+    def convert(angle):
+        if 22.5 <= angle < 67.5:
+            return 45
+        elif 67.5 <= angle < 112.5:
+            return 90
+        elif 112.5 <= angle <= 157.5:
+            return 135
+        else:
+            return 0
+
+
+    pixel_values = np.array([
+        [7, 1, 3, 8, 8, 8],
+        [2, 0, 6, 5, 7, 0],
+        [6, 6, 4, 2, 7, 6],
+        [3, 8, 7, 1, 0, 1],
+        [2, 4, 9, 6, 2, 8],
+        [1, 4, 8, 7, 5, 3]
+    ], dtype=np.float64)
+    x_gradient = ndimage.convolve(pixel_values, algorithm.Matrix.x_sobel, mode='constant', cval=0)
+    y_gradient = ndimage.convolve(pixel_values, algorithm.Matrix.y_sobel, mode='constant', cval=0)
+    gradient = np.sqrt(x_gradient**2 + y_gradient**2)
+    theta = np.degrees(np.arctan(y_gradient / (x_gradient + np.finfo(np.float64).eps)))
+    theta = np.where(theta >= 0, theta, theta+180)
+    theta = np.vectorize(convert)(theta)
+    print(theta)
+
+
+def test_roll():
+    # Example input array
+    pixel_values = np.array([
+        [1, 2, 3],
+        [4, 5, 6],
+        [7, 8, 9]]
+    )
+
+    theta = np.array([
+        [0, 135, 45],
+        [0, 90, 0],
+        [90, 0, 45]]
+    )
+
+    # Shift every element one element to the right
+    # shifted_array = np.roll(array, shift=(0, -1), axis=(0, 1))
+    # shifted_array = np.roll(array, shift=(0, 1), axis=(0, 1))
+    max_0degree = np.maximum(
+        np.roll(
+            np.pad(pixel_values, pad_width=1, mode='constant', constant_values=0),
+            shift=(0, 1), axis=(0, 1)
+        ),
+        np.roll(
+            np.pad(pixel_values, pad_width=1, mode='constant', constant_values=0),
+            shift=(0, -1), axis=(0, 1)
+        )
+    )[1:-1, 1:-1]
+    max_0degree = np.where(theta == 0, max_0degree, 0)
+
+    a = np.where(theta == 0, pixel_values, 0)
+    b = np.maximum(a, max_0degree)
+    print(b)
+
+test_roll()
+

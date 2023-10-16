@@ -2,6 +2,28 @@ import numpy as np
 from scipy import ndimage
 
 
+class Matrix:
+    x1d = np.array([[1],
+                    [-1]], dtype=np.float64)
+    y1d = np.array([[1, -1]], dtype=np.float64)
+    x_robert = np.array([[-1, 0],
+                        [0, 1]], dtype=np.float64)
+    y_robert = np.array([[0, 1],
+                        [-1, 0]], dtype=np.float64)
+    x_prewitt = np.array([[1, 0, -1],
+                         [1, 0, -1],
+                         [1, 0, -1]], dtype=np.float64)
+    y_prewitt = np.array([[1, 1, 1],
+                         [0, 0, 0],
+                         [-1, -1, -1]], dtype=np.float64)
+    x_sobel = np.array([[1, 0, -1],
+                       [2, 0, -2],
+                       [1, 0, -1]], dtype=np.float64)
+    y_sobel = np.array([[1, 2, 1],
+                       [0, 0, 0],
+                       [-1, -2, -1]], dtype=np.float64)
+
+
 def create_custom_weighted_kernel(k: int):
     limit = (k - 1) // 2
     matrix = np.zeros((k, k))
@@ -33,53 +55,34 @@ def otsu(pixel_values: np.ndarray):
 
 
 def mask1d(pixel_values: np.ndarray):
-    x1d = np.array([[1],
-                    [-1]], dtype=np.float64)
-    y1d = np.array([[1, -1]], dtype=np.float64)
-    x_gradient = ndimage.convolve(pixel_values, x1d, mode='constant', cval=0)
-    y_gradient = ndimage.convolve(pixel_values, y1d, mode='constant', cval=0)
+    x_gradient = ndimage.convolve(pixel_values, Matrix.x1d, mode='constant', cval=0)
+    y_gradient = ndimage.convolve(pixel_values, Matrix.y1d, mode='constant', cval=0)
     gradient = np.round(np.sqrt(x_gradient ** 2 + y_gradient ** 2))
     return gradient
 
 
 def robert(pixel_values: np.ndarray):
-    x_robert = np.array([[-1, 0],
-                        [0, 1]], dtype=np.float64)
-    y_robert = np.array([[0, 1],
-                        [-1, 0]], dtype=np.float64)
-    x_gradient = ndimage.convolve(pixel_values, x_robert, mode='constant', cval=0)
-    y_gradient = ndimage.convolve(pixel_values, y_robert, mode='constant', cval=0)
+    x_gradient = ndimage.convolve(pixel_values, Matrix.x_robert, mode='constant', cval=0)
+    y_gradient = ndimage.convolve(pixel_values, Matrix.y_robert, mode='constant', cval=0)
     gradient = np.round(np.sqrt(x_gradient ** 2 + y_gradient ** 2))
     return gradient
 
 
 def prewitt(pixel_values: np.ndarray):
-    x_prewitt = np.array([[1, 0, -1],
-                         [1, 0, -1],
-                         [1, 0, -1]], dtype=np.float64)
-    y_prewitt = np.array([[1, 1, 1],
-                         [0, 0, 0],
-                         [-1, -1, -1]], dtype=np.float64)
-    x_gradient = ndimage.convolve(pixel_values, x_prewitt, mode='constant', cval=0)
-    y_gradient = ndimage.convolve(pixel_values, y_prewitt, mode='constant', cval=0)
+    x_gradient = ndimage.convolve(pixel_values, Matrix.x_prewitt, mode='constant', cval=0)
+    y_gradient = ndimage.convolve(pixel_values, Matrix.y_prewitt, mode='constant', cval=0)
     gradient = np.round(np.sqrt(x_gradient ** 2 + y_gradient ** 2))
     return gradient
 
 
 def sobel(pixel_values: np.ndarray):
-    x_sobel = np.array([[1, 0, -1],
-                       [2, 0, -2],
-                       [1, 0, -1]], dtype=np.float64)
-    y_sobel = np.array([[1, 2, 1],
-                       [0, 0, 0],
-                       [-1, -2, -1]], dtype=np.float64)
-    x_gradient = ndimage.convolve(pixel_values, x_sobel, mode='constant', cval=0)
-    y_gradient = ndimage.convolve(pixel_values, y_sobel, mode='constant', cval=0)
+    x_gradient = ndimage.convolve(pixel_values, Matrix.x_sobel, mode='constant', cval=0)
+    y_gradient = ndimage.convolve(pixel_values, Matrix.y_sobel, mode='constant', cval=0)
     gradient = np.round(np.sqrt(x_gradient ** 2 + y_gradient ** 2))
     return gradient
 
 
-def gaussian_filter(pixel_values: np.ndarray, kernel_size=3, sigma=1):
+def gaussian_filter(pixel_values: np.ndarray, kernel_size: int, sigma: float):
     # Calculate the center of the kernel
     center = (kernel_size - 1) / 2
 
@@ -91,4 +94,4 @@ def gaussian_filter(pixel_values: np.ndarray, kernel_size=3, sigma=1):
     gaussian_kernel = gaussian_kernel / np.sum(gaussian_kernel.flatten())
 
     result = ndimage.convolve(pixel_values, gaussian_kernel, mode='constant', cval=0)
-    return np.round(result).astype(np.uint8)
+    return np.round(result)

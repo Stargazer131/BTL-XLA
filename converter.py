@@ -181,3 +181,122 @@ def laplacian_filter(image: Image.Image, parameter: list):
     processed_image.putdata(pixel_values.flatten())
     return processed_image
 
+
+def canny(image: Image.Image, parameter: list):
+    pixel_values = np.array(image.getdata(), dtype=np.float64)
+    pixel_values = pixel_values.reshape(image.height, image.width)
+    kernel_size, sigma, t2 = 5, 1.0, 85
+    t1 = 2 * t2
+
+    # canny algorithm
+    # step 1, Smoothing
+    pixel_values = algorithm.gaussian_filter(pixel_values, kernel_size, sigma)
+
+    # step 2, Gradient operator
+    def convert_angle(angle):
+        if angle < 0:
+            angle += 180
+        if 22.5 <= angle < 67.5:
+            return 45
+        elif 67.5 <= angle < 112.5:
+            return 90
+        elif 112.5 <= angle <= 157.5:
+            return 135
+        else:
+            return 0
+
+    x_gradient = ndimage.convolve(pixel_values, algorithm.Matrix.x_sobel, mode='constant', cval=0)
+    y_gradient = ndimage.convolve(pixel_values, algorithm.Matrix.y_sobel, mode='constant', cval=0)
+    gradient = np.sqrt(x_gradient**2 + y_gradient**2)
+    theta = np.arctan(y_gradient / (x_gradient + np.finfo(np.float64).eps))
+    theta = np.vectorize(convert_angle)(theta)
+
+    # step 3, Non-maximum suppression
+    # max neighbour
+    max_neighbour_0degree = np.maximum(
+        np.roll(
+            np.pad(pixel_values, pad_width=1, mode='constant', constant_values=0),
+            shift=(0, 1), axis=(0, 1)
+        ),
+        np.roll(
+            np.pad(pixel_values, pad_width=1, mode='constant', constant_values=0),
+            shift=(0, -1), axis=(0, 1)
+        )
+    )[1:-1, 1:-1]
+
+    max_neighbour_45degree = np.maximum(
+        np.roll(
+            np.pad(pixel_values, pad_width=1, mode='constant', constant_values=0),
+            shift=(-1, 1), axis=(0, 1)
+        ),
+        np.roll(
+            np.pad(pixel_values, pad_width=1, mode='constant', constant_values=0),
+            shift=(1, -1), axis=(0, 1)
+        )
+    )[1:-1, 1:-1]
+
+    max_neighbour_90degree = np.maximum(
+        np.roll(
+            np.pad(pixel_values, pad_width=1, mode='constant', constant_values=0),
+            shift=(-1, 0), axis=(0, 1)
+        ),
+        np.roll(
+            np.pad(pixel_values, pad_width=1, mode='constant', constant_values=0),
+            shift=(1, 0), axis=(0, 1)
+        )
+    )[1:-1, 1:-1]
+
+    max_neighbour_135degree = np.maximum(
+        np.roll(
+            np.pad(pixel_values, pad_width=1, mode='constant', constant_values=0),
+            shift=(-1, -1), axis=(0, 1)
+        ),
+        np.roll(
+            np.pad(pixel_values, pad_width=1, mode='constant', constant_values=0),
+            shift=(1, 1), axis=(0, 1)
+        )
+    )[1:-1, 1:-1]
+
+    max_0degree = np.where(theta == 0, gradient, 0)
+    max_0degree = np.where(max_0degree > max_neighbour_0degree, max_0degree, 0)
+
+    max_45degree = np.where(theta == 45, gradient, 0)
+    max_45degree = np.where(max_45degree > max_neighbour_45degree, max_45degree, 0)
+
+    max_90degree = np.where(theta == 90, gradient, 0)
+    max_90degree = np.where(max_90degree > max_neighbour_90degree, max_90degree, 0)
+
+    max_135degree = np.where(theta == 135, gradient, 0)
+    max_135degree = np.where(max_135degree > max_neighbour_135degree, max_135degree, 0)
+
+    suppressed = max_0degree + max_45degree + max_90degree + max_135degree
+
+    # step 4, Hysteresis thresholding
+    t1_higher = np.where(suppressed > t1, suppressed, 0)
+    t2_higher_t1_lower = np.where((t2 <= suppressed) & (suppressed <= t1), suppressed, 0)
+
+    mask_kernel = np.ones((3, 3))
+    mask_kernel[1, 1] = 0
+    mask_sum = ndimage.convolve(suppressed, mask_kernel, mode='constant', cval=0)
+
+    t2_higher_t1_lower = np.where(mask_sum != 0, t2_higher_t1_lower, 0)
+    suppressed = t1_higher + t2_higher_t1_lower
+    pixel_values = np.clip(np.round(suppressed), 0, 255).astype(np.uint8)
+
+    processed_image = image.copy()
+    processed_image.putdata(pixel_values.flatten())
+    return processed_image
+
+
+def mask_one_dim(image: Image.Image, parameter: list):
+    pixel_values = np.array(image.getdata(), dtype=np.uint8)
+    pixel_values = pixel_values.reshape(image.height, image.width)
+
+    # median filter algorithm
+    pixel_values = np.clip(algorithm.mask1d(pixel_values), 0, 255).astype(np.uint8)
+    pixel_values = np.where(pixel_values > 0, 255, 0)
+
+    processed_image = image.copy()
+    processed_image.putdata(pixel_values.flatten())
+    return processed_image
+

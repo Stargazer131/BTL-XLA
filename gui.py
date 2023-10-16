@@ -112,7 +112,6 @@ class GenericFrame:
 
 class App:
     def __init__(self):
-
         self.algorithm_classes = utility.get_classes_from_file('gui.py')
 
         # Create the main window
@@ -323,3 +322,11 @@ class LaplacianFilter(GenericFrame):
         self.parameters = self.type_combobox.get()
 
         super().process_image()
+
+
+class Canny(GenericFrame):
+    pass
+
+
+class MaskOneDim(GenericFrame):
+    pass
