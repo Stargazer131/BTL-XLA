@@ -1,4 +1,4 @@
-from tkinter import ttk, messagebox, filedialog
+from tkinter import ttk, filedialog
 import tkinter as tk
 from PIL import Image, ImageTk
 import converter
@@ -12,7 +12,7 @@ class GenericFrame:
         # main window
         self.root = tk.Tk()
         self.algorithm = algorithm
-        self.parameters = None
+        self.parameters = []
 
         # top part
         self.top_panel = ttk.Frame(self.root, borderwidth=2, relief="solid")
@@ -128,7 +128,8 @@ class App:
 
         # Create a combobox
         algorithm_options = utility.get_available_algorithms()
-        self.combobox = ttk.Combobox(self.frame, values=algorithm_options, state='readonly', cursor='hand2')
+        self.combobox = ttk.Combobox(self.frame, values=algorithm_options, state='readonly', cursor='hand2',
+                                     font="Verdana 13 bold")
         self.combobox.grid(row=0, column=1, padx=10, pady=10)
         self.combobox.set(algorithm_options[0])
 
@@ -175,7 +176,6 @@ class Threshold(GenericFrame):
 class PowerLaw(GenericFrame):
     def __init__(self, algorithm):
         super().__init__(algorithm)
-
         self.c_entry = tk.Entry(self.top_panel)
         self.y_entry = tk.Entry(self.top_panel)
 
@@ -194,22 +194,16 @@ class PowerLaw(GenericFrame):
         try:
             c = float(self.c_entry.get())
             y = float(self.y_entry.get())
-            if c <= 0 or y <= 0:
-                messagebox.showerror("Error", "Invalid input. Please enter number > 0")
-                return
         except ValueError:
-            messagebox.showerror("Error", "Invalid input. Please enter numeric values.")
             return
 
         self.parameters = [c, y]
-
         super().process_image()
 
 
 class Filter(GenericFrame):
     def __init__(self, algorithm):
         super().__init__(algorithm)
-
         self.k_entry = tk.Entry(self.top_panel)
 
     def init_top_panel(self):
@@ -223,14 +217,11 @@ class Filter(GenericFrame):
         try:
             k = int(self.k_entry.get())
             if k < 3 or k % 2 == 0:
-                messagebox.showerror("Error", "Invalid input. Please enter an odd number and >= 3")
                 return
         except ValueError:
-            messagebox.showerror("Error", "Invalid input. Please enter numeric values.")
             return
 
         self.parameters = [k]
-
         super().process_image()
 
 
@@ -253,7 +244,6 @@ class WeightedAverageFilter(Filter):
 class KNearestMeanFilter(GenericFrame):
     def __init__(self, algorithm):
         super().__init__(algorithm)
-
         self.k_entry = tk.Entry(self.top_panel)
         self.threshold_entry = tk.Entry(self.top_panel)
         self.kernel_size_entry = tk.Entry(self.top_panel)
@@ -278,20 +268,13 @@ class KNearestMeanFilter(GenericFrame):
             k = int(self.k_entry.get())
             threshold = int(self.threshold_entry.get())
             kernel_size = int(self.kernel_size_entry.get())
-            if kernel_size < 3 or kernel_size % 2 == 0:
-                messagebox.showerror("Error", "Invalid input. Please enter an kernel size with odd number and >= 3")
-                return
-
-            if threshold <= 0 or k <= 0:
-                messagebox.showerror("Error", "Invalid input. Please enter threshold or k > 0")
+            if kernel_size < 3 or kernel_size % 2 == 0 or threshold <= 0 or k <= 0:
                 return
 
         except ValueError:
-            messagebox.showerror("Error", "Invalid input. Please enter numeric values.")
             return
 
         self.parameters = [k, kernel_size, threshold]
-
         super().process_image()
 
 
@@ -306,7 +289,6 @@ class MedianFilter(Filter):
 class LaplacianFilter(GenericFrame):
     def __init__(self, algorithm):
         super().__init__(algorithm)
-
         values = ['filter', 'variant_filter', 'enhancer', 'variant_enhancer']
         self.type_combobox = ttk.Combobox(self.top_panel, values=values, state='readonly', cursor='hand2')
         self.type_combobox.set(values[0])
@@ -320,7 +302,6 @@ class LaplacianFilter(GenericFrame):
 
     def process_image(self):
         self.parameters = self.type_combobox.get()
-
         super().process_image()
 
 
@@ -328,5 +309,22 @@ class Canny(GenericFrame):
     pass
 
 
+class Otsu(GenericFrame):
+    pass
+
+
 class MaskOneDim(GenericFrame):
     pass
+
+
+class Robert(GenericFrame):
+    pass
+
+
+class Sobel(GenericFrame):
+    pass
+
+
+class Prewitt(GenericFrame):
+    pass
+

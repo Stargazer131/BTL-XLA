@@ -17,7 +17,7 @@ def negative(image: Image.Image, parameter: list):
     return processed_image
 
 
-def threshold(image: Image.Image, parameter: list):
+def otsu(image: Image.Image, parameter: list):
     pixel_values = np.array(image.getdata())
 
     # threshold algorithm with otsu threshold
@@ -185,7 +185,7 @@ def laplacian_filter(image: Image.Image, parameter: list):
 def canny(image: Image.Image, parameter: list):
     pixel_values = np.array(image.getdata(), dtype=np.float64)
     pixel_values = pixel_values.reshape(image.height, image.width)
-    kernel_size, sigma, t2 = 5, 1.0, 85
+    kernel_size, sigma, t2 = 3, 1.0, 85
     t1 = 2 * t2
 
     # canny algorithm
@@ -294,9 +294,43 @@ def mask_one_dim(image: Image.Image, parameter: list):
 
     # median filter algorithm
     pixel_values = np.clip(algorithm.mask1d(pixel_values), 0, 255).astype(np.uint8)
-    pixel_values = np.where(pixel_values > 0, 255, 0)
 
     processed_image = image.copy()
     processed_image.putdata(pixel_values.flatten())
     return processed_image
 
+
+def robert(image: Image.Image, parameter: list):
+    pixel_values = np.array(image.getdata(), dtype=np.uint8)
+    pixel_values = pixel_values.reshape(image.height, image.width)
+
+    # median filter algorithm
+    pixel_values = np.clip(algorithm.robert(pixel_values), 0, 255).astype(np.uint8)
+
+    processed_image = image.copy()
+    processed_image.putdata(pixel_values.flatten())
+    return processed_image
+
+
+def sobel(image: Image.Image, parameter: list):
+    pixel_values = np.array(image.getdata(), dtype=np.uint8)
+    pixel_values = pixel_values.reshape(image.height, image.width)
+
+    # median filter algorithm
+    pixel_values = np.clip(algorithm.sobel(pixel_values), 0, 255).astype(np.uint8)
+
+    processed_image = image.copy()
+    processed_image.putdata(pixel_values.flatten())
+    return processed_image
+
+
+def prewitt(image: Image.Image, parameter: list):
+    pixel_values = np.array(image.getdata(), dtype=np.uint8)
+    pixel_values = pixel_values.reshape(image.height, image.width)
+
+    # median filter algorithm
+    pixel_values = np.clip(algorithm.prewitt(pixel_values), 0, 255).astype(np.uint8)
+
+    processed_image = image.copy()
+    processed_image.putdata(pixel_values.flatten())
+    return processed_image
