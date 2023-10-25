@@ -22,6 +22,26 @@ class Matrix:
     y_sobel = np.array([[1, 2, 1],
                        [0, 0, 0],
                        [-1, -2, -1]], dtype=np.float64)
+    laplacian_filter = np.array([
+        [0, 1, 0],
+        [1, -4, 1],
+        [0, 1, 0]
+    ], dtype=np.float64)
+    laplacian_variant_filter = np.array([
+        [0, 1, 0],
+        [1, -8, 1],
+        [0, 1, 0]
+    ], dtype=np.float64)
+    laplacian_enhancer = np.array([
+        [0, -1, 0],
+        [-1, 5, -1],
+        [0, -1, 0]
+    ], dtype=np.float64)
+    laplacian_variant_enhancer = np.array([
+        [-1, -1, -1],
+        [-1, 9, -1],
+        [-1, -1, -1]
+    ], dtype=np.float64)
 
 
 def create_custom_weighted_kernel(k: int):
@@ -42,16 +62,16 @@ def create_custom_weighted_kernel(k: int):
     return matrix
 
 
-def otsu(pixel_values: np.ndarray):
-    grayscale_frequency = np.bincount(pixel_values) / len(pixel_values)
-    pi_cumsum = np.cumsum(grayscale_frequency)
-    mk_cumsum = np.cumsum(grayscale_frequency * np.array(range(len(grayscale_frequency))))
-    mg = mk_cumsum[-1]  # total cumulative sum
-    a = (mg * pi_cumsum - mk_cumsum) ** 2
-    b = pi_cumsum * (1 - pi_cumsum)
-    variance = a / (b + np.finfo(np.float64).eps)  # add epsilon to prevent divide by 0
-    otsu_threshold = np.mean(np.argwhere(variance == np.max(variance)))
-    return otsu_threshold
+def line2d_coefficient(x1, y1, x2, y2):
+    a = (y1 - y2) / (x1 - x2)
+    b = y1 - x1 * a
+    return a, b
+
+
+def distance(x, y, a, b):
+    ts = np.abs(a * x - y + b)
+    ms = np.sqrt(a ** 2 + b ** 2)
+    return ts / ms
 
 
 def mask1d(pixel_values: np.ndarray):

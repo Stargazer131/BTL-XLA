@@ -28,3 +28,5 @@ def split_camel_case(input_string: str):
 def get_available_algorithms():
     algorithms = [name for name in dir(converter) if callable(getattr(converter, name))]
     return algorithms
+
+

@@ -17,18 +17,6 @@ def negative(image: Image.Image, parameter: list):
     return processed_image
 
 
-def otsu(image: Image.Image, parameter: list):
-    pixel_values = np.array(image.getdata())
-
-    # threshold algorithm with otsu threshold
-    otsu_threshold = algorithm.otsu(pixel_values)
-    pixel_values = np.where(pixel_values > otsu_threshold, 255, 0).astype(np.uint8)
-
-    processed_image = image.copy()
-    processed_image.putdata(pixel_values)
-    return processed_image
-
-
 def power_law(image: Image.Image, parameter: list):
     pixel_values = np.array(image.getdata())
     c, y = parameter[0], parameter[1]
@@ -151,29 +139,13 @@ def laplacian_filter(image: Image.Image, parameter: list):
 
     # laplacian filter and enhancer
     if kernel_type == 'filter':
-        kernel = np.array([
-            [0, 1, 0],
-            [1, -4, 1],
-            [0, 1, 0]
-        ], dtype=np.float64)
+        kernel = algorithm.Matrix.laplacian_filter
     elif kernel_type == 'variant_filter':
-        kernel = np.array([
-            [0, 1, 0],
-            [1, -8, 1],
-            [0, 1, 0]
-        ], dtype=np.float64)
+        kernel = algorithm.Matrix.laplacian_variant_filter
     elif kernel_type == 'enhancer':
-        kernel = np.array([
-            [0, -1, 0],
-            [-1, 5, -1],
-            [0, -1, 0]
-        ], dtype=np.float64)
+        kernel = algorithm.Matrix.laplacian_enhancer
     else:
-        kernel = np.array([
-            [-1, -1, -1],
-            [-1, 9, -1],
-            [-1, -1, -1]
-        ], dtype=np.float64)
+        kernel = algorithm.Matrix.laplacian_variant_enhancer
     pixel_values = ndimage.convolve(pixel_values, kernel, mode='constant', cval=0)
     pixel_values = np.clip(pixel_values, 0, 255).astype(np.uint8)
 
@@ -334,3 +306,79 @@ def prewitt(image: Image.Image, parameter: list):
     processed_image = image.copy()
     processed_image.putdata(pixel_values.flatten())
     return processed_image
+
+
+def otsu(image: Image.Image, parameter: list):
+    pixel_values = np.array(image.getdata())
+
+    # threshold algorithm with otsu threshold
+    grayscale_frequency = np.bincount(pixel_values) / len(pixel_values)
+    pi_cumsum = np.cumsum(grayscale_frequency)
+    mk_cumsum = np.cumsum(grayscale_frequency * np.array(range(len(grayscale_frequency))))
+    mg = mk_cumsum[-1]  # total cumulative sum
+    a = (mg * pi_cumsum - mk_cumsum) ** 2
+    b = pi_cumsum * (1 - pi_cumsum)
+    variance = a / (b + np.finfo(np.float64).eps)  # add epsilon to prevent divide by 0
+    otsu_threshold = np.mean(np.argwhere(variance == np.max(variance)))
+    #
+    pixel_values = np.where(pixel_values > otsu_threshold, 255, 0).astype(np.uint8)
+
+    processed_image = image.copy()
+    processed_image.putdata(pixel_values)
+    return processed_image
+
+
+def isodata(image: Image.Image, parameter: list):
+    pixel_values = np.array(image.getdata())
+
+    # threshold algorithm with isodata threshold
+    grayscale_frequency = np.bincount(pixel_values) / len(pixel_values)
+    arr_len = len(grayscale_frequency)
+    t = arr_len // 2
+    while True:
+        center1 = np.sum(np.array(range(t)) * grayscale_frequency[:t]) / np.sum(grayscale_frequency[:t])
+        center2 = np.sum(np.array(range(t, arr_len)) * grayscale_frequency[t:]) / np.sum(grayscale_frequency[t:])
+        new_t = int(np.round((center1 + center2) / 2))
+        if new_t == t:
+            break
+        t = new_t
+    isodata_threshold = t
+    #
+    pixel_values = np.where(pixel_values > isodata_threshold, 255, 0).astype(np.uint8)
+
+    processed_image = image.copy()
+    processed_image.putdata(pixel_values)
+    return processed_image
+
+
+def triangle(image: Image.Image, parameter: list):
+    pixel_values = np.array(image.getdata())
+
+    # threshold algorithm with triangle threshold
+    grayscale_frequency = np.bincount(pixel_values)
+    max_val, min_val = np.argmax(grayscale_frequency), np.argmin(grayscale_frequency)
+    min_coord = (min_val, grayscale_frequency[min_val])
+    max_coord = (max_val, grayscale_frequency[max_val])
+
+    start, end = int(min(min_coord[0], max_coord[0])), int(max(min_coord[0], max_coord[0]))
+    a, b = algorithm.line2d_coefficient(min_coord[0], min_coord[1], max_coord[0], max_coord[1])
+    x = np.array(range(start, end+1))
+    y = grayscale_frequency[start:end+1]
+    distances = algorithm.distance(x, y, a, b)
+    triangle_threshold = np.argmax(distances) + start
+    #
+    pixel_values = np.where(pixel_values > triangle_threshold, 255, 0).astype(np.uint8)
+
+    processed_image = image.copy()
+    processed_image.putdata(pixel_values)
+    return processed_image
+
+
+def background_symetry(image: Image.Image, parameter: list):
+    pixel_values = np.array(image.getdata())
+    percent = parameter[0]
+
+    # threshold algorithm with background symetry threshold
+    grayscale_frequency = np.bincount(pixel_values)
+    max_val = np.argmax(grayscale_frequency)
+    max_val_freq = grayscale_frequency[max_val]

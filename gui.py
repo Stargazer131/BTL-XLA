@@ -313,6 +313,14 @@ class Otsu(GenericFrame):
     pass
 
 
+class Isodata(GenericFrame):
+    pass
+
+
+class Triangle(GenericFrame):
+    pass
+
+
 class MaskOneDim(GenericFrame):
     pass
 
