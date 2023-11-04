@@ -264,8 +264,9 @@ def mask_one_dim(image: Image.Image, parameter: list):
     pixel_values = np.array(image.getdata(), dtype=np.uint8)
     pixel_values = pixel_values.reshape(image.height, image.width)
 
-    # median filter algorithm
+    # mask one dim algorithm
     pixel_values = np.clip(algorithm.mask1d(pixel_values), 0, 255).astype(np.uint8)
+    pixel_values = np.where(pixel_values > 0, 255, 0)
 
     processed_image = image.copy()
     processed_image.putdata(pixel_values.flatten())
@@ -276,8 +277,9 @@ def robert(image: Image.Image, parameter: list):
     pixel_values = np.array(image.getdata(), dtype=np.uint8)
     pixel_values = pixel_values.reshape(image.height, image.width)
 
-    # median filter algorithm
+    # robert algorithm
     pixel_values = np.clip(algorithm.robert(pixel_values), 0, 255).astype(np.uint8)
+    pixel_values = np.where(pixel_values > 0, 255, 0)
 
     processed_image = image.copy()
     processed_image.putdata(pixel_values.flatten())
@@ -288,8 +290,9 @@ def sobel(image: Image.Image, parameter: list):
     pixel_values = np.array(image.getdata(), dtype=np.uint8)
     pixel_values = pixel_values.reshape(image.height, image.width)
 
-    # median filter algorithm
+    # sobel algorithm
     pixel_values = np.clip(algorithm.sobel(pixel_values), 0, 255).astype(np.uint8)
+    pixel_values = np.where(pixel_values > 0, 255, 0)
 
     processed_image = image.copy()
     processed_image.putdata(pixel_values.flatten())
@@ -300,8 +303,9 @@ def prewitt(image: Image.Image, parameter: list):
     pixel_values = np.array(image.getdata(), dtype=np.uint8)
     pixel_values = pixel_values.reshape(image.height, image.width)
 
-    # median filter algorithm
+    # prewitt algorithm
     pixel_values = np.clip(algorithm.prewitt(pixel_values), 0, 255).astype(np.uint8)
+    pixel_values = np.where(pixel_values > 0, 255, 0)
 
     processed_image = image.copy()
     processed_image.putdata(pixel_values.flatten())
