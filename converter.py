@@ -130,7 +130,7 @@ def median_filter(image: Image.Image, parameter: list):
 
 # end of image enhancer (chap 3)
 
-# start of edge detection (chap 4)
+# start of edge detection (chap 5)
 
 def laplacian_filter(image: Image.Image, parameter: list):
     pixel_values = np.array(image.getdata(), dtype=np.float64)
@@ -380,9 +380,31 @@ def triangle(image: Image.Image, parameter: list):
 
 def background_symetry(image: Image.Image, parameter: list):
     pixel_values = np.array(image.getdata())
-    percent = parameter[0]
+    percent, direction = parameter[0], parameter[1]
 
     # threshold algorithm with background symetry threshold
     grayscale_frequency = np.bincount(pixel_values)
     max_val = np.argmax(grayscale_frequency)
     max_val_freq = grayscale_frequency[max_val]
+
+    x = max_val_freq * percent/100
+    abs_diff = np.abs(grayscale_frequency - x)
+    if direction == 'left':
+        if max_val != 0:
+            p_percent = np.argmin(abs_diff[:int(max_val)])
+        else:
+            p_percent = np.argmin(abs_diff[int(max_val) + 1:])
+            p_percent += max_val + 1
+    else:
+        if max_val != 255:
+            p_percent = np.argmin(abs_diff[int(max_val)+1:])
+            p_percent += max_val + 1
+        else:
+            p_percent = np.argmin(abs_diff[:int(max_val)])
+    symetry_threshold = max_val - (p_percent - max_val)
+    #
+    pixel_values = np.where(pixel_values > symetry_threshold, 255, 0).astype(np.uint8)
+
+    processed_image = image.copy()
+    processed_image.putdata(pixel_values)
+    return processed_image

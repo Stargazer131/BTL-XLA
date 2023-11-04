@@ -76,6 +76,7 @@ class GenericFrame:
         if file_path:
             self.input_image = Image.open(file_path)
             self.input_image = self.input_image.convert("L")  # Convert the image to grayscale
+            self.output_image = self.input_image.copy()
 
             # Resize the image to fit within the maximum dimensions while maintaining its aspect ratio
             display_image = self.input_image.copy()
@@ -86,13 +87,12 @@ class GenericFrame:
             self.input_image_label.image = display_image
 
     def process_image(self):
-        processed_image = self.input_image.copy()
-
         # get selected algorithm name
         selected_function = getattr(converter, self.algorithm)  # store the function
-        processed_image = selected_function(processed_image, self.parameters)
+        self.output_image = selected_function(self.output_image, self.parameters)
 
         # Resize the image to fit within the maximum dimensions while maintaining its aspect ratio
+        processed_image = self.output_image.copy()
         processed_image.thumbnail((self.max_image_width, self.max_image_height))
 
         processed_image = ImageTk.PhotoImage(processed_image)
@@ -195,7 +195,7 @@ class PowerLaw(GenericFrame):
             c = float(self.c_entry.get())
             y = float(self.y_entry.get())
         except ValueError:
-            return
+            c, y = 1, 1
 
         self.parameters = [c, y]
         super().process_image()
@@ -217,9 +217,9 @@ class Filter(GenericFrame):
         try:
             k = int(self.k_entry.get())
             if k < 3 or k % 2 == 0:
-                return
+                k = 3
         except ValueError:
-            return
+            k = 3
 
         self.parameters = [k]
         super().process_image()
@@ -269,10 +269,9 @@ class KNearestMeanFilter(GenericFrame):
             threshold = int(self.threshold_entry.get())
             kernel_size = int(self.kernel_size_entry.get())
             if kernel_size < 3 or kernel_size % 2 == 0 or threshold <= 0 or k <= 0:
-                return
-
+                k, kernel_size, threshold = 3, 2, 125
         except ValueError:
-            return
+            k, kernel_size, threshold = 3, 2, 125
 
         self.parameters = [k, kernel_size, threshold]
         super().process_image()
@@ -284,7 +283,7 @@ class MedianFilter(Filter):
 
 # end of image enhancer (chap 3)
 
-# start of edge detection (chap 4)
+# start of edge detection (chap 5)
 
 class LaplacianFilter(GenericFrame):
     def __init__(self, algorithm):
@@ -336,3 +335,34 @@ class Sobel(GenericFrame):
 class Prewitt(GenericFrame):
     pass
 
+
+class BackgroundSymetry(GenericFrame):
+    def __init__(self, algorithm):
+        super().__init__(algorithm)
+        self.percent_entry = tk.Entry(self.top_panel)
+
+        values = ['left', 'right']
+        self.direction_combobox = ttk.Combobox(self.top_panel, values=values, state='readonly', cursor='hand2')
+        self.direction_combobox.set(values[0])
+
+    def init_top_panel(self):
+        super().init_top_panel()
+
+        percent_label = ttk.Label(self.top_panel, text="Percent(P%): ")
+        percent_label.grid(row=0, column=1, padx=5, pady=5)
+        self.percent_entry.grid(row=0, column=2, padx=5, pady=5)
+
+        direction_label = ttk.Label(self.top_panel, text="Direction: ")
+        direction_label.grid(row=0, column=3, padx=5, pady=5)
+        self.direction_combobox.grid(row=0, column=4, padx=5, pady=5)
+
+    def process_image(self):
+        try:
+            percent = float(self.percent_entry.get())
+            if percent < 0 or percent > 100:
+                percent = 80
+        except ValueError:
+            percent = 80
+
+        self.parameters = [percent, self.direction_combobox.get()]
+        super().process_image()
