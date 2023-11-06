@@ -393,7 +393,7 @@ def background_symetry(image: Image.Image, parameter: list):
         if max_val != 0:
             p_percent = np.argmin(abs_diff[:int(max_val)])
         else:
-            p_percent = np.argmin(abs_diff[int(max_val) + 1:])
+            p_percent = np.argmin(abs_diff[int(max_val)+1:])
             p_percent += max_val + 1
     else:
         if max_val != 255:

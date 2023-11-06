@@ -26,7 +26,6 @@ class GenericFrame:
         self.output_image_label = ttk.Label(self.right_panel)
 
         self.input_image = Image.new("L", (1, 1))
-        self.output_image = Image.new("L", (1, 1))
 
         self.window_width, self.window_height = 1500, 775
         self.x_position, self.y_position = 10, 0
@@ -76,7 +75,6 @@ class GenericFrame:
         if file_path:
             self.input_image = Image.open(file_path)
             self.input_image = self.input_image.convert("L")  # Convert the image to grayscale
-            self.output_image = self.input_image.copy()
 
             # Resize the image to fit within the maximum dimensions while maintaining its aspect ratio
             display_image = self.input_image.copy()
@@ -89,10 +87,11 @@ class GenericFrame:
     def process_image(self):
         # get selected algorithm name
         selected_function = getattr(converter, self.algorithm)  # store the function
-        self.output_image = selected_function(self.output_image, self.parameters)
+
+        processed_image = self.input_image.copy()
+        processed_image = selected_function(processed_image, self.parameters)
 
         # Resize the image to fit within the maximum dimensions while maintaining its aspect ratio
-        processed_image = self.output_image.copy()
         processed_image.thumbnail((self.max_image_width, self.max_image_height))
 
         processed_image = ImageTk.PhotoImage(processed_image)
