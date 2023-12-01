@@ -261,12 +261,13 @@ def canny(image: Image.Image, parameter: list):
 
 
 def mask_one_dim(image: Image.Image, parameter: list):
-    pixel_values = np.array(image.getdata(), dtype=np.uint8)
+    threshold = parameter[0]
+    pixel_values = np.array(image.getdata())
     pixel_values = pixel_values.reshape(image.height, image.width)
 
     # mask one dim algorithm
     pixel_values = np.clip(algorithm.mask1d(pixel_values), 0, 255).astype(np.uint8)
-    pixel_values = np.where(pixel_values > 0, 255, 0)
+    pixel_values = np.where(pixel_values > threshold, 255, 0)
 
     processed_image = image.copy()
     processed_image.putdata(pixel_values.flatten())
@@ -274,12 +275,13 @@ def mask_one_dim(image: Image.Image, parameter: list):
 
 
 def robert(image: Image.Image, parameter: list):
-    pixel_values = np.array(image.getdata(), dtype=np.uint8)
+    threshold = parameter[0]
+    pixel_values = np.array(image.getdata())
     pixel_values = pixel_values.reshape(image.height, image.width)
 
     # robert algorithm
     pixel_values = np.clip(algorithm.robert(pixel_values), 0, 255).astype(np.uint8)
-    pixel_values = np.where(pixel_values > 0, 255, 0)
+    pixel_values = np.where(pixel_values > threshold, 255, 0)
 
     processed_image = image.copy()
     processed_image.putdata(pixel_values.flatten())
@@ -287,12 +289,13 @@ def robert(image: Image.Image, parameter: list):
 
 
 def sobel(image: Image.Image, parameter: list):
-    pixel_values = np.array(image.getdata(), dtype=np.uint8)
+    threshold = parameter[0]
+    pixel_values = np.array(image.getdata())
     pixel_values = pixel_values.reshape(image.height, image.width)
 
     # sobel algorithm
     pixel_values = np.clip(algorithm.sobel(pixel_values), 0, 255).astype(np.uint8)
-    pixel_values = np.where(pixel_values > 0, 255, 0)
+    pixel_values = np.where(pixel_values > threshold, 255, 0)
 
     processed_image = image.copy()
     processed_image.putdata(pixel_values.flatten())
@@ -300,12 +303,13 @@ def sobel(image: Image.Image, parameter: list):
 
 
 def prewitt(image: Image.Image, parameter: list):
-    pixel_values = np.array(image.getdata(), dtype=np.uint8)
+    threshold = parameter[0]
+    pixel_values = np.array(image.getdata())
     pixel_values = pixel_values.reshape(image.height, image.width)
 
     # prewitt algorithm
     pixel_values = np.clip(algorithm.prewitt(pixel_values), 0, 255).astype(np.uint8)
-    pixel_values = np.where(pixel_values > 0, 255, 0)
+    pixel_values = np.where(pixel_values > threshold, 255, 0)
 
     processed_image = image.copy()
     processed_image.putdata(pixel_values.flatten())

@@ -168,10 +168,6 @@ class Negative(GenericFrame):
     pass
 
 
-class Threshold(GenericFrame):
-    pass
-
-
 class PowerLaw(GenericFrame):
     def __init__(self, algorithm):
         super().__init__(algorithm)
@@ -284,6 +280,30 @@ class MedianFilter(Filter):
 
 # start of edge detection (chap 5)
 
+class Threshold(GenericFrame):
+    def __init__(self, algorithm):
+        super().__init__(algorithm)
+        self.threshold_entry = tk.Entry(self.top_panel)
+
+    def init_top_panel(self):
+        super().init_top_panel()
+
+        threshold_label = ttk.Label(self.top_panel, text="Threshold: ")
+        threshold_label.grid(row=0, column=1, padx=5, pady=5)
+        self.threshold_entry.grid(row=0, column=2, padx=5, pady=5)
+
+    def process_image(self):
+        try:
+            k = int(self.threshold_entry.get())
+            if k < 0 or k > 255:
+                k = 0
+        except ValueError:
+            k = 0
+
+        self.parameters = [k]
+        super().process_image()
+
+
 class LaplacianFilter(GenericFrame):
     def __init__(self, algorithm):
         super().__init__(algorithm)
@@ -319,19 +339,19 @@ class Triangle(GenericFrame):
     pass
 
 
-class MaskOneDim(GenericFrame):
+class MaskOneDim(Threshold):
     pass
 
 
-class Robert(GenericFrame):
+class Robert(Threshold):
     pass
 
 
-class Sobel(GenericFrame):
+class Sobel(Threshold):
     pass
 
 
-class Prewitt(GenericFrame):
+class Prewitt(Threshold):
     pass
 
 
