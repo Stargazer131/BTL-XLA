@@ -324,7 +324,43 @@ class LaplacianFilter(GenericFrame):
 
 
 class Canny(GenericFrame):
-    pass
+    def __init__(self, algorithm):
+        super().__init__(algorithm)
+        self.big_t_entry = tk.Entry(self.top_panel)
+        self.small_t_entry = tk.Entry(self.top_panel)
+
+    def init_top_panel(self):
+        super().init_top_panel()
+
+        big_t_label = ttk.Label(self.top_panel, text="Large threshold: ")
+        big_t_label.grid(row=0, column=1, padx=5, pady=5)
+        self.big_t_entry.grid(row=0, column=2, padx=5, pady=5)
+
+        small_t_label = ttk.Label(self.top_panel, text="Small threshold: ")
+        small_t_label.grid(row=0, column=3, padx=5, pady=5)
+        self.small_t_entry.grid(row=0, column=4, padx=5, pady=5)
+
+    def process_image(self):
+        try:
+            t1 = int(self.big_t_entry.get())
+        except ValueError:
+            t1 = None
+
+        try:
+            t2 = int(self.small_t_entry.get())
+        except ValueError:
+            t2 = None
+
+        if t1 is None and t2 is not None:
+            t1 = t2 * 2
+        elif t1 is not None and t2 is None:
+            t2 = t1 // 2
+        elif t1 is None and t2 is None:
+            t2 = 85
+            t1 = t2 * 2
+
+        self.parameters = [t2, t1]
+        super().process_image()
 
 
 class Otsu(GenericFrame):
@@ -362,7 +398,7 @@ class BackgroundSymetry(GenericFrame):
 
         values = ['left', 'right']
         self.direction_combobox = ttk.Combobox(self.top_panel, values=values, state='readonly', cursor='hand2')
-        self.direction_combobox.set(values[0])
+        self.direction_combobox.set(values[1])
 
     def init_top_panel(self):
         super().init_top_panel()

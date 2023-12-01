@@ -155,10 +155,10 @@ def laplacian_filter(image: Image.Image, parameter: list):
 
 
 def canny(image: Image.Image, parameter: list):
+    t2, t1 = parameter[0], parameter[1]
     pixel_values = np.array(image.getdata(), dtype=np.float64)
     pixel_values = pixel_values.reshape(image.height, image.width)
-    kernel_size, sigma, t2 = 3, 1.0, 85
-    t1 = 2 * t2
+    kernel_size, sigma = 3, 1.0
 
     # canny algorithm
     # step 1, Smoothing
@@ -384,28 +384,25 @@ def triangle(image: Image.Image, parameter: list):
 
 def background_symetry(image: Image.Image, parameter: list):
     pixel_values = np.array(image.getdata())
-    percent, direction = parameter[0], parameter[1]
+    percent = parameter[0]
 
     # threshold algorithm with background symetry threshold
     grayscale_frequency = np.bincount(pixel_values)
-    max_val = np.argmax(grayscale_frequency)
-    max_val_freq = grayscale_frequency[max_val]
+    total_pixels = len(pixel_values)
+    peak_val = np.argmax(grayscale_frequency)
+    freq_cumulative_sum = np.cumsum(grayscale_frequency)
+    p_percent = 0
+    for i in range(256):
+        pi = freq_cumulative_sum[i] / total_pixels * 100
+        if pi >= percent:
+            if i != 0:
+                p_percent = i
+                p0 = freq_cumulative_sum[i-1] / total_pixels * 100
+                if abs(percent - p0) < abs(percent - pi):
+                    p_percent = i-1
+            break
 
-    x = max_val_freq * percent/100
-    abs_diff = np.abs(grayscale_frequency - x)
-    if direction == 'left':
-        if max_val != 0:
-            p_percent = np.argmin(abs_diff[:int(max_val)])
-        else:
-            p_percent = np.argmin(abs_diff[int(max_val)+1:])
-            p_percent += max_val + 1
-    else:
-        if max_val != 255:
-            p_percent = np.argmin(abs_diff[int(max_val)+1:])
-            p_percent += max_val + 1
-        else:
-            p_percent = np.argmin(abs_diff[:int(max_val)])
-    symetry_threshold = max_val - (p_percent - max_val)
+    symetry_threshold = peak_val - (p_percent - peak_val)
     #
     pixel_values = np.where(pixel_values > symetry_threshold, 255, 0).astype(np.uint8)
 
