@@ -196,6 +196,28 @@ class PowerLaw(GenericFrame):
         super().process_image()
 
 
+class Logarith(GenericFrame):
+    def __init__(self, algorithm):
+        super().__init__(algorithm)
+        self.c_entry = tk.Entry(self.top_panel)
+
+    def init_top_panel(self):
+        super().init_top_panel()
+
+        c_label = ttk.Label(self.top_panel, text="C: ")
+        c_label.grid(row=0, column=1, padx=5, pady=5)
+        self.c_entry.grid(row=0, column=2, padx=5, pady=5)
+
+    def process_image(self):
+        try:
+            c = float(self.c_entry.get())
+        except ValueError:
+            c = None
+
+        self.parameters = [c]
+        super().process_image()
+
+
 class Filter(GenericFrame):
     def __init__(self, algorithm):
         super().__init__(algorithm)
@@ -421,3 +443,47 @@ class BackgroundSymetry(GenericFrame):
 
         self.parameters = [percent, self.direction_combobox.get()]
         super().process_image()
+
+# end of edge detection (chap 5)
+
+# start of morphology (chap 7)
+
+
+class Morph(GenericFrame):
+    def __init__(self, algorithm):
+        super().__init__(algorithm)
+        self.k_entry = tk.Entry(self.top_panel)
+
+    def init_top_panel(self):
+        super().init_top_panel()
+
+        k_label = ttk.Label(self.top_panel, text="Kernel size: ")
+        k_label.grid(row=0, column=1, padx=5, pady=5)
+        self.k_entry.grid(row=0, column=2, padx=5, pady=5)
+
+    def process_image(self):
+        try:
+            k = int(self.k_entry.get())
+            if k < 3 or k % 2 == 0:
+                k = 3
+        except ValueError:
+            k = 3
+
+        self.parameters = [k]
+        super().process_image()
+
+
+class Erosion(Morph):
+    pass
+
+
+class Dilate(Morph):
+    pass
+
+
+class Opening(Morph):
+    pass
+
+
+class Closing(Morph):
+    pass

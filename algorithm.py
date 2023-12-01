@@ -62,6 +62,24 @@ def create_custom_weighted_kernel(k: int):
     return matrix
 
 
+def create_custom_morphing_kernel(k: int):
+    limit = (k - 1) // 2
+    matrix = np.ones((k, k))
+    for x in range(limit + 1):
+        for y in range(limit + 1):
+            if y < limit-x:
+                matrix[x, y] = 0
+
+    flip_right_matrix = np.fliplr(matrix[:limit + 1, :limit + 1])
+    flip_down_matrix = np.flipud(matrix[:limit + 1, :limit + 1])
+
+    matrix[:limit + 1, limit:] = flip_right_matrix
+    matrix[limit:, :limit + 1] = flip_down_matrix
+    matrix[limit:, limit:] = np.flipud(flip_right_matrix)
+
+    return matrix
+
+
 def line2d_coefficient(x1, y1, x2, y2):
     a = (y1 - y2) / (x1 - x2)
     b = y1 - x1 * a

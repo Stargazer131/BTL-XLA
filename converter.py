@@ -23,6 +23,23 @@ def power_law(image: Image.Image, parameter: list):
 
     # power law algorithm
     pixel_values = c * (pixel_values ** y)
+    #
+
+    pixel_values = np.clip(pixel_values, 0, 255).astype(np.uint8)
+    processed_image = image.copy()
+    processed_image.putdata(pixel_values)
+    return processed_image
+
+
+def logarith(image: Image.Image, parameter: list):
+    pixel_values = np.array(image.getdata())
+    c = parameter[0]
+    if c is None:
+        c = 255 / np.log(1 + np.max(pixel_values))
+
+    # logarith algorithm
+    pixel_values = c * np.log(1 + pixel_values)
+    #
 
     pixel_values = np.clip(pixel_values, 0, 255).astype(np.uint8)
     processed_image = image.copy()
@@ -409,3 +426,72 @@ def background_symetry(image: Image.Image, parameter: list):
     processed_image = image.copy()
     processed_image.putdata(pixel_values)
     return processed_image
+
+# end of edge detection (chap 5)
+
+# start of morphology (chap 7)
+
+
+def erosion(image: Image.Image, parameter: list):
+    k = parameter[0]
+    pixel_values = np.array(image.getdata())
+    pixel_values = pixel_values.reshape(image.height, image.width)
+    # morphing_kernel = np.ones((k, k))
+    morphing_kernel = algorithm.create_custom_morphing_kernel(k) * 255
+
+    # erosion algorithm
+    result = ndimage.binary_erosion(pixel_values, morphing_kernel)
+    result = np.where(result, 255, 0)
+
+    processed_image = image.copy()
+    processed_image.putdata(result.flatten())
+    return processed_image
+
+
+def dilate(image: Image.Image, parameter: list):
+    k = parameter[0]
+    pixel_values = np.array(image.getdata())
+    pixel_values = pixel_values.reshape(image.height, image.width)
+    # morphing_kernel = np.ones((k, k))
+    morphing_kernel = algorithm.create_custom_morphing_kernel(k) * 255
+
+    # dilate algorithm
+    result = ndimage.binary_dilation(pixel_values, morphing_kernel)
+    result = np.where(result, 255, 0)
+
+    processed_image = image.copy()
+    processed_image.putdata(result.flatten())
+    return processed_image
+
+
+def opening(image: Image.Image, parameter: list):
+    k = parameter[0]
+    pixel_values = np.array(image.getdata())
+    pixel_values = pixel_values.reshape(image.height, image.width)
+    # morphing_kernel = np.ones((k, k))
+    morphing_kernel = algorithm.create_custom_morphing_kernel(k) * 255
+
+    # opening algorithm
+    result = ndimage.binary_opening(pixel_values, morphing_kernel)
+    result = np.where(result, 255, 0)
+
+    processed_image = image.copy()
+    processed_image.putdata(result.flatten())
+    return processed_image
+
+
+def closing(image: Image.Image, parameter: list):
+    k = parameter[0]
+    pixel_values = np.array(image.getdata())
+    pixel_values = pixel_values.reshape(image.height, image.width)
+    # morphing_kernel = np.ones((k, k))
+    morphing_kernel = algorithm.create_custom_morphing_kernel(k) * 255
+
+    # opening algorithm
+    result = ndimage.binary_closing(pixel_values, morphing_kernel)
+    result = np.where(result, 255, 0)
+
+    processed_image = image.copy()
+    processed_image.putdata(result.flatten())
+    return processed_image
+
