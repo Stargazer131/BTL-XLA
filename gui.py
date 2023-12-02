@@ -341,7 +341,7 @@ class LaplacianFilter(GenericFrame):
         self.type_combobox.grid(row=0, column=2, padx=5, pady=5)
 
     def process_image(self):
-        self.parameters = self.type_combobox.get()
+        self.parameters = [self.type_combobox.get()]
         super().process_image()
 
 

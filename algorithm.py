@@ -28,9 +28,9 @@ class Matrix:
         [0, 1, 0]
     ], dtype=np.float64)
     laplacian_variant_filter = np.array([
-        [0, 1, 0],
+        [1, 1, 1],
         [1, -8, 1],
-        [0, 1, 0]
+        [1, 1, 1]
     ], dtype=np.float64)
     laplacian_enhancer = np.array([
         [0, -1, 0],
